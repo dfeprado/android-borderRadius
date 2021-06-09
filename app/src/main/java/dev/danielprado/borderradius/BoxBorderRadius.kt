@@ -1,11 +1,13 @@
 package dev.danielprado.borderradius
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.View
 import androidx.annotation.Dimension
 
@@ -15,7 +17,9 @@ class BoxBorderRadius(context: Context, attrs: AttributeSet?): View(context, att
     private var bottomRightRadius = 0f
     private var bottomLeftRadius = 0f
     private var path: Path? = null
-    private var borderRadiusString = "0px"
+    private var borderRadiusString = ""
+    private var borderRadiusRegex = Regex("(?:(\\d+)(px|em|%)){1,4}", RegexOption.IGNORE_CASE)
+    private val displayMetrics = Resources.getSystem().displayMetrics
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
         style = Paint.Style.FILL
@@ -27,19 +31,62 @@ class BoxBorderRadius(context: Context, attrs: AttributeSet?): View(context, att
             paint.color = value
         }
 
-//    var borderRadius: String
-//        get() = this.borderRadiusString
-//        set(value) {
-//            value.matches(Regex(""))
-//        }
+    var borderRadius: String
+        get() = this.borderRadiusString
+        set(value) {
+            if (value.isNotEmpty()) {
+                val matches = borderRadiusRegex.findAll(value)
+                when(matches.count()) {
+                    4 -> setRadiusFrom4Values(matches)
+                    3 -> setRadiusFrom3Values(matches)
+                    2 -> setRadiusFrom2Values(matches)
+                    1 -> setRadiusFrom1Value(matches)
+                }
 
-    override fun onDraw(canvas: Canvas?) {
-        if (path == null)
-            return
-
-        canvas?.apply {
-            drawPath(path!!, paint)
+            } else {
+                topLeftRadius = 0f
+                topRightRadius = 0f
+                bottomLeftRadius = 0f
+                bottomRightRadius = 0f
+            }
         }
+
+    private fun getRadiusValue(match: MatchResult): Float {
+        val unit = match.groupValues[2]
+        val value = match.groupValues[1].toFloat()
+        return when(unit) {
+            "em" -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, displayMetrics)
+            "%" -> width * value / 100 // %
+            else -> value // px
+        }
+    }
+
+    private fun setRadiusFrom4Values(matches: Sequence<MatchResult>) {
+        topLeftRadius = getRadiusValue(matches.elementAt(0))
+        topRightRadius = getRadiusValue(matches.elementAt(1))
+        bottomRightRadius = getRadiusValue(matches.elementAt(2))
+        bottomLeftRadius = getRadiusValue(matches.elementAt(3))
+    }
+
+    private fun setRadiusFrom3Values(matches: Sequence<MatchResult>) {
+        topLeftRadius = getRadiusValue(matches.elementAt(0))
+        topRightRadius = getRadiusValue(matches.elementAt(1))
+        bottomLeftRadius = topRightRadius
+        bottomRightRadius = getRadiusValue(matches.elementAt(2))
+    }
+
+    private fun setRadiusFrom2Values(matches: Sequence<MatchResult>) {
+        topLeftRadius = getRadiusValue(matches.elementAt(0))
+        bottomRightRadius = topLeftRadius
+        topRightRadius = getRadiusValue(matches.elementAt(1))
+        bottomLeftRadius = topRightRadius
+    }
+
+    private fun setRadiusFrom1Value(matches: Sequence<MatchResult>) {
+        topLeftRadius = getRadiusValue(matches.elementAt(0))
+        topRightRadius = topLeftRadius
+        bottomRightRadius = topLeftRadius
+        bottomLeftRadius = topLeftRadius
     }
 
     private fun limitBorderRadius(controlValue: Float) {
@@ -56,7 +103,17 @@ class BoxBorderRadius(context: Context, attrs: AttributeSet?): View(context, att
             bottomRightRadius = controlValue
     }
 
+    override fun onDraw(canvas: Canvas?) {
+        if (path == null)
+            return
+
+        canvas?.apply {
+            drawPath(path!!, paint)
+        }
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        borderRadius = "50% 50em"
         val width = (w - 1).toFloat()
         val height = (h - 1).toFloat()
         limitBorderRadius(width/2)
