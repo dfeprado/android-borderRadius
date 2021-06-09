@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BoxBorderRadius">
+        <attr name="borderRadius" format="string" />
+        <attr name="bkgColor" format="color" />
+    </declare-styleable>
+</resources>
