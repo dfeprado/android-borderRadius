@@ -9,7 +9,6 @@ import android.graphics.Path
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
-import androidx.annotation.Dimension
 
 class BoxBorderRadius(context: Context, attrs: AttributeSet?): View(context, attrs) {
     private var topLeftRadius = 0f
@@ -23,6 +22,19 @@ class BoxBorderRadius(context: Context, attrs: AttributeSet?): View(context, att
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
         style = Paint.Style.FILL
+    }
+
+    init {
+        context.theme.obtainStyledAttributes(attrs, R.styleable.BoxBorderRadius, 0, 0).apply {
+            try {
+                paint.color = getColor(R.styleable.BoxBorderRadius_bkgColor, Color.BLACK)
+                borderRadius = getString(R.styleable.BoxBorderRadius_borderRadius) ?: ""
+            }
+            finally {
+                recycle()
+            }
+
+        }
     }
 
     var bkgColor: Int
@@ -49,6 +61,7 @@ class BoxBorderRadius(context: Context, attrs: AttributeSet?): View(context, att
                 bottomLeftRadius = 0f
                 bottomRightRadius = 0f
             }
+            borderRadiusString = value
         }
 
     private fun getRadiusValue(match: MatchResult): Float {
@@ -113,7 +126,6 @@ class BoxBorderRadius(context: Context, attrs: AttributeSet?): View(context, att
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        borderRadius = "50% 50em"
         val width = (w - 1).toFloat()
         val height = (h - 1).toFloat()
         limitBorderRadius(width/2)
