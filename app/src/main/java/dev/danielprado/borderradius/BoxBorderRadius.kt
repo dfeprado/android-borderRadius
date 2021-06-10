@@ -28,7 +28,7 @@ class BoxBorderRadius(context: Context, attrs: AttributeSet?): View(context, att
         context.theme.obtainStyledAttributes(attrs, R.styleable.BoxBorderRadius, 0, 0).apply {
             try {
                 paint.color = getColor(R.styleable.BoxBorderRadius_bkgColor, Color.BLACK)
-                borderRadius = getString(R.styleable.BoxBorderRadius_borderRadius) ?: ""
+                parseBorderRadius(getString(R.styleable.BoxBorderRadius_borderRadius) ?: "")
             }
             finally {
                 recycle()
@@ -41,28 +41,35 @@ class BoxBorderRadius(context: Context, attrs: AttributeSet?): View(context, att
         get() = paint.color
         set(value) {
             paint.color = value
+            invalidate()
         }
 
     var borderRadius: String
         get() = this.borderRadiusString
         set(value) {
-            if (value.isNotEmpty()) {
-                val matches = borderRadiusRegex.findAll(value)
-                when(matches.count()) {
-                    4 -> setRadiusFrom4Values(matches)
-                    3 -> setRadiusFrom3Values(matches)
-                    2 -> setRadiusFrom2Values(matches)
-                    1 -> setRadiusFrom1Value(matches)
-                }
-
-            } else {
-                topLeftRadius = 0f
-                topRightRadius = 0f
-                bottomLeftRadius = 0f
-                bottomRightRadius = 0f
-            }
+            parseBorderRadius(value)
             borderRadiusString = value
+            buildPath()
+            invalidate()
         }
+
+    private fun parseBorderRadius(value: String) {
+        if (value.isNotEmpty()) {
+            val matches = borderRadiusRegex.findAll(value)
+            when(matches.count()) {
+                4 -> setRadiusFrom4Values(matches)
+                3 -> setRadiusFrom3Values(matches)
+                2 -> setRadiusFrom2Values(matches)
+                1 -> setRadiusFrom1Value(matches)
+            }
+
+        } else {
+            topLeftRadius = 0f
+            topRightRadius = 0f
+            bottomLeftRadius = 0f
+            bottomRightRadius = 0f
+        }
+    }
 
     private fun getRadiusValue(match: MatchResult): Float {
         val unit = match.groupValues[2]
@@ -102,34 +109,26 @@ class BoxBorderRadius(context: Context, attrs: AttributeSet?): View(context, att
         bottomLeftRadius = topLeftRadius
     }
 
-    private fun limitBorderRadius(controlValue: Float) {
+    private fun limitBorderRadius() {
+        val controlValue = if (width > height) height.toFloat()/2 else width.toFloat()/2
+
         if (topRightRadius > controlValue)
-            topRightRadius = controlValue
+            topRightRadius = controlValue - 1
 
         if (topLeftRadius > controlValue)
-            topLeftRadius = controlValue
+            topLeftRadius = controlValue - 1
 
         if (bottomRightRadius > controlValue)
-            bottomRightRadius = controlValue
+            bottomRightRadius = controlValue - 1
 
         if (bottomLeftRadius > controlValue)
-            bottomRightRadius = controlValue
+            bottomRightRadius = controlValue - 1
     }
 
-    override fun onDraw(canvas: Canvas?) {
-        if (path == null)
-            return
-
-        canvas?.apply {
-            drawPath(path!!, paint)
-        }
-    }
-
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        val width = (w - 1).toFloat()
-        val height = (h - 1).toFloat()
-        limitBorderRadius(width/2)
-
+    private fun buildPath() {
+        limitBorderRadius()
+        val width = this.width.toFloat() - 1
+        val height = this.height.toFloat() - 1
         path = Path().apply {
             moveTo(0 + topLeftRadius, 0f)
 
@@ -152,5 +151,18 @@ class BoxBorderRadius(context: Context, attrs: AttributeSet?): View(context, att
             lineTo(0f, 0f + topLeftRadius)
             cubicTo(0f, 0f + topLeftRadius, 0f, 0f, 0f + topLeftRadius, 0f)
         }
+    }
+
+    override fun onDraw(canvas: Canvas?) {
+        if (path == null)
+            return
+
+        canvas?.apply {
+            drawPath(path!!, paint)
+        }
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        buildPath()
     }
 }
