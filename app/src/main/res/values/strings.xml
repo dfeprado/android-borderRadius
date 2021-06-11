@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">BorderRadius</string>
     <string name="explain_text">Enter a CSS border-radius rule, then click on Apply button</string>
-    <string name="default_border_radius_text">15em 50em 30em</string>
+    <string name="default_border_radius_text">100%</string>
     <string name="apply_btn_text">Apply</string>
+    <string name="units_explanation_text">You can use units px, em or %</string>
 </resources>

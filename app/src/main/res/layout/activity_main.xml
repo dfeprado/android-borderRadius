@@ -10,43 +10,52 @@
         android:id="@+id/textView"
         android:layout_width="333dp"
         android:layout_height="21dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/explain_text"
+        android:textSize="18dp"
         app:layout_constraintBottom_toTopOf="@+id/boxBorderRadius"
         app:layout_constraintEnd_toEndOf="@+id/boxBorderRadius"
         app:layout_constraintStart_toStartOf="@+id/boxBorderRadius"
         app:layout_constraintTop_toTopOf="parent"
-        android:textSize="18dp"
-        android:textColor="@color/black"
-        app:layout_constraintVertical_bias="0.38"
+        app:layout_constraintVertical_bias="0.29000002"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <dev.danielprado.borderradius.BoxBorderRadius
         android:id="@+id/boxBorderRadius"
-        android:layout_width="293dp"
-        android:layout_height="139dp"
+        android:layout_width="285dp"
+        android:layout_height="136dp"
         android:layout_marginBottom="32dp"
         app:bkgColor="@color/design_default_color_primary"
-        app:borderRadius="15em 50em 30em"
-        app:layout_constraintBottom_toTopOf="@+id/border_radius_input"
+        app:borderRadius="100%"
+        app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/units_explanation_text"
+        app:layout_constraintBottom_toTopOf="@+id/border_radius_input"
+        app:layout_constraintEnd_toEndOf="@+id/boxBorderRadius"
+        app:layout_constraintStart_toStartOf="@+id/boxBorderRadius"
+        app:layout_constraintTop_toBottomOf="@+id/boxBorderRadius" />
 
     <EditText
         android:id="@+id/border_radius_input"
         android:layout_width="226dp"
         android:layout_height="48dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="16dp"
+        android:importantForAutofill="no"
         android:inputType="text"
-        android:textAlignment="center"
         android:text="@string/default_border_radius_text"
+        android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/button"
         app:layout_constraintEnd_toEndOf="@+id/boxBorderRadius"
         app:layout_constraintStart_toStartOf="@+id/boxBorderRadius"
-        app:layout_constraintTop_toBottomOf="@+id/boxBorderRadius"
-        android:importantForAutofill="no" />
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
     <Button
         android:id="@+id/button"
